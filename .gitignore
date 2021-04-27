@@ -18,3 +18,5 @@ share*
 *.log
 log/*
 pyvenv*
+*.pyc
+
