@@ -1,0 +1,20 @@
+#Virtualenv files
+include/*
+lib/*
+
+
+#Secret information
+*environ*
+*config*
+*.pem
+
+
+#information that isnt required by collaborators
+bin*
+dist*
+*egg-info*
+local*
+share*
+*.log
+log/*
+pyvenv*
