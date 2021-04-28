@@ -8,7 +8,7 @@ from loko.models.models import Base
 
 setup(
 	name = "loko",
-	version = "0.1.0",
+	version = "0.1.2",
 	author = "Mcflyhalf",
 	author_email = "mcflyhalf@live.com",
 	description = ("Store, send and receive money in different currencies"),
@@ -23,7 +23,9 @@ config['DEFAULT'] = {}
 default = config['DEFAULT']
 
 default['install location'] = str(os.getcwd())	#Base install directory
-default['sqlite file'] = os.path.join(config['DEFAULT']['Install Location'], 'loko','models', 'loko.db') 		#face images relative to the base install directory
+default['sqlite production db'] = os.path.join(config['DEFAULT']['Install Location'], 'loko','models', 'loko_prod.db')
+default['sqlite development db'] = os.path.join(config['DEFAULT']['Install Location'], 'loko','models', 'loko_dev.db')
+default['sqlite test db'] = os.path.join(config['DEFAULT']['Install Location'], 'loko','tests', 'loko_test.db')
 default['config_file'] = os.path.join(os.getcwd(), CONFIG_FILENAME)
 
 #Create config file
@@ -61,5 +63,10 @@ class LokoConfig:
 		# self.drop_tables(engine)
 		self.create_tables(engine)
 
-engine = models.production_engine
-LokoConfig(engine)
+prod_engine = models.production_engine
+LokoConfig(prod_engine)
+
+dev_engine = models.development_engine
+LokoConfig(dev_engine)
+
+

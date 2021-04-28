@@ -1,4 +1,5 @@
 from flask import Blueprint
+from loko.models import current_user
 
 index_blueprint = Blueprint('index_blueprint', __name__)
 

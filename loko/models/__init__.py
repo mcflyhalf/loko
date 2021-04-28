@@ -12,13 +12,13 @@ def get_tables_metadata():
 	return sorted_tables
 
 production_engine = create_engine('sqlite:///{dbpath}'.format(\
-	dbpath = config['sqlite file']))
+	dbpath = config['sqlite production db']))
 
 development_engine = create_engine('sqlite:///{dbpath}'.format(\
-	dbpath = config['sqlite file']))
+	dbpath = config['sqlite development db']))
 
 test_engine = create_engine('sqlite:///{dbpath}'.format(\
-	dbpath = config['sqlite file']))
+	dbpath = config['sqlite test db']))
 
 ProductionSession = sessionmaker(bind=production_engine)
 production_session = ProductionSession()
@@ -36,3 +36,9 @@ if env == 'test':
 	session=test_session
 elif env == 'production':
 	session == production_session
+
+class Usr:
+	is_authenticated = False
+	username = 'mock_user'
+
+current_user = Usr()

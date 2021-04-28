@@ -19,4 +19,4 @@ share*
 log/*
 pyvenv*
 *.pyc
-
+*.db
