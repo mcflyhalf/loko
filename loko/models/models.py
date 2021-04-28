@@ -1,9 +1,12 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Boolean
 from loko.models import Base
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 currency_code = String(3)
+wallet_id = String
+user_id = Integer
+wallet_balance = Float
 
 class Currencies(Base):
 	__tablename__ = "currencies"
@@ -16,14 +19,27 @@ class Currencies(Base):
 class Wallets(Base):
 	__tablename__ = "wallets"
 
-	id = Column(String, primary_key=True)
+	id = Column(wallet_id, primary_key=True)
 	currency = Column(currency_code, ForeignKey("currencies.alphabetic_code"), nullable=False)
-	balance = Column(Integer, nullable=False)
+	balance = Column(wallet_balance, nullable=False)
+
+class Transactions(Base):
+	__tablename__ = "transactions"
+
+	id = Column(Integer, primary_key=True)
+	date = Column(DateTime, nullable=False)
+	origin = Column(wallet_id, ForeignKey("wallets.id"), nullable=False)
+	destination = Column(wallet_id, ForeignKey("wallets.id"), nullable=False)
+	originator = Column(user_id, ForeignKey("users.id"), nullable=False)
+	amount = Column(wallet_balance, nullable=False)
+	currency = Column(currency_code, ForeignKey("currencies.alphabetic_code"), nullable=False)
+
+
 
 class Users(Base):
 	__tablename__ = "users"
 
-	id = Column(Integer, primary_key=True)
+	id = Column(user_id, primary_key=True)
 	username = Column(String(20),nullable=False,unique=True)	#Always Lowercase
 	name = Column(String,nullable=False)
 	email = Column(String(50),nullable=False)

@@ -2,6 +2,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 import configparser
+from sqlalchemy.orm import sessionmaker
 
 
 CONFIG_FILENAME = 'loko_config.cfg'
@@ -36,3 +37,4 @@ def get_logger(loggerName):
 	log.addHandler(ch)
 	log.setLevel(logging.DEBUG)
 	return log
+
