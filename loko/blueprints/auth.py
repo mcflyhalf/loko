@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template, redirect, flash, url_for, request
 from loko.blueprints.index import index_blueprint
-from loko.models import session, models
+from loko.models import get_db_session, models
 from loko.forms import RegistrationForm, LoginForm
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 
 auth_blueprint = Blueprint('auth_blueprint', __name__)
+env = os.environ['FLASK_ENV']
+session = get_db_session(env=env)
 
 @auth_blueprint.route('/login', methods=['GET','POST'])
 def login():
@@ -45,7 +47,7 @@ def register():
 		user = models.Users(username=form.username.data.lower(), name=form.name.data, email=form.email.data,authenticated=False,active=True)
 		user.set_password(form.password.data)
 		session.add(user)
-		session.commit()		
+		session.commit()
 		flash('Congratulations, you are now a registered user!')
 		return redirect(url_for('auth_blueprint.login'))
 	return render_template('register.html', form=form, current_user=current_user, title='Register')
