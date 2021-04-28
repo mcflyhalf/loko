@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 currency_code = String(3)
-wallet_id = String
+wallet_id = Integer
 user_id = Integer
 wallet_balance = Float
 
@@ -20,6 +20,7 @@ class Wallets(Base):
 	__tablename__ = "wallets"
 
 	id = Column(wallet_id, primary_key=True)
+	userid = Column(user_id, ForeignKey("users.id"), nullable=False)
 	currency = Column(currency_code, ForeignKey("currencies.alphabetic_code"), nullable=False)
 	balance = Column(wallet_balance, nullable=False)
 

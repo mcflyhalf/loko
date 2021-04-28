@@ -1,7 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from loko import get_configs
+from loko.conf import get_configs
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -27,12 +27,21 @@ development_session = DevelopmentSession()
 TestSession = sessionmaker(bind=test_engine)
 test_session = TestSession()
 
-env = os.environ['FLASK_ENV'].lower()
+sessions = {}
+sessions['test'] = test_session
+sessions['development'] = development_session
+sessions['production'] = production_session
 
-#default session
-session = development_session
+def get_db_session(env='development'):
+	'''
+    :param env: session's environment. Can be development, test or production
+    :raise ValueError: If env not in ['development', 'test', 'production'] .
+    :return: A session instance to the appropriate db
+    '''
+	#default session
+	session = sessions.get(env.lower())
 
-if env == 'test':
-	session=test_session
-elif env == 'production':
-	session == production_session
+	if session is None:
+		raise ValueError("env parameter must be 'development', 'test' or 'production'")
+
+	return session
