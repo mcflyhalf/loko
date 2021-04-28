@@ -1,12 +1,11 @@
-from flask import Blueprint, render_template, redirect, flash, url_for
+from flask import Blueprint, render_template, redirect, flash, url_for, request
 from loko.blueprints.index import index_blueprint
-from loko.models import session, current_user, models
+from loko.models import session, models
 from loko.forms import RegistrationForm, LoginForm
-
-# url_mocks = {'current_user': usr}
+from flask_login import login_user, logout_user, current_user, login_required
+from werkzeug.urls import url_parse
 
 auth_blueprint = Blueprint('auth_blueprint', __name__)
-
 
 @auth_blueprint.route('/login', methods=['GET','POST'])
 def login():
@@ -22,19 +21,20 @@ def login():
 
 		if user is None or not user.check_password(password):
 			flash('Invalid username or password')
-			return redirect(url_for('login'))
+			return redirect(url_for('auth_blueprint.login'))
 		
 		login_user(user, remember=form.remember_me.data)
 		next_page = request.args.get('next')
 		if not next_page or url_parse(next_page).netloc != '':
-			next_page = url_for('index_blueprintlanding')
+			next_page = url_for('index_blueprint.landing')
 		return redirect(next_page)
-	return render_template('login.html', title='Sign In', form=form)
-	# return 'Hello World. This is the login page'
+	return render_template('login.html', title='Sign In', form=form, current_user=current_user)
 
 @auth_blueprint.route('/logout')
+@login_required
 def logout():
-	return 'Hello World. This is the logout page'
+	logout_user()
+	return redirect(url_for('index_blueprint.landing'))
 
 @auth_blueprint.route('/register', methods=['GET','POST'])
 def register():

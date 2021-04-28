@@ -36,9 +36,3 @@ if env == 'test':
 	session=test_session
 elif env == 'production':
 	session == production_session
-
-class Usr:
-	is_authenticated = False
-	username = 'mock_user'
-
-current_user = Usr()
