@@ -66,8 +66,8 @@ class Wallets(Base):
 	__tablename__ = "wallets"
 
 	id = Column(wallet_id, primary_key=True)
-	userid = Column(user_id, ForeignKey("users.id"), nullable=False)
-	currency = Column(currency_code, ForeignKey("currencies.alphabetic_code"), nullable=False)
+	ownerid = Column(user_id, ForeignKey("users.id"), nullable=False)
+	currency_alpha_code = Column(currency_code, ForeignKey("currencies.alphabetic_code"), nullable=False)
 	balance = Column(wallet_balance, nullable=False)
 
 class Transactions(Base):
