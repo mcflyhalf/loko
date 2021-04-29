@@ -1,8 +1,11 @@
+import os
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
-from loko.models import session, models
+from loko.models import get_db_session, models
 
+env = os.environ['FLASK_ENV']
+session = get_db_session(env=env)
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
 	password = PasswordField('Password', validators=[DataRequired()])

@@ -24,6 +24,17 @@ class UserCreator:
 	currency='KES' - (optional) ISO4217 currency alphabetic code.
 	'''
 	def __init__(self, session, **kwargs):
+		'''
+		Expected kwargs:
+		username - user's username
+		password - user's raw password
+		name - user's name
+		email - user's email address
+		authenticated - Bool, whether user is authed
+		active - Bool, whether user is active
+
+		currency='KES' - (optional) ISO4217 currency alphabetic code.
+		'''
 		self.kwargs = kwargs
 		self.session=session
 

@@ -21,3 +21,6 @@ pyvenv*
 *.pyc
 *.db
 *.db-journal
+*tryzex*
+*deleteme*
+

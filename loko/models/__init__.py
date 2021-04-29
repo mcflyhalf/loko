@@ -39,9 +39,9 @@ def get_db_session(env='development'):
     :return: A session instance to the appropriate db
     '''
 	#default session
-	session = sessions.get(env.lower())
+	session_type = sessions.get(env.lower())
 
-	if session is None:
+	if session_type is None:
 		raise ValueError("env parameter must be 'development', 'test' or 'production'")
 
-	return session
+	return session_type

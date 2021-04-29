@@ -2,13 +2,14 @@
 from setuptools import setup, find_packages
 from loko import LokoConfig, get_logger, models 
 from loko.conf import CONFIG_FILENAME
+from loko.biz.xchange import XCHANGE_FILENAME_BASE
 import configparser
 import os
 
 
 setup(
 	name = "loko",
-	version = "0.1.3",
+	version = "0.1.5",
 	author = "Mcflyhalf",
 	author_email = "mcflyhalf@live.com",
 	description = ("Store, send and receive money in different currencies"),
@@ -27,7 +28,8 @@ default['sqlite production db'] = os.path.join(config['DEFAULT']['Install Locati
 default['sqlite development db'] = os.path.join(config['DEFAULT']['Install Location'], 'loko','models', 'loko_dev.db')
 default['sqlite test db'] = os.path.join(config['DEFAULT']['Install Location'], 'loko','tests', 'loko_test.db')
 default['config_file'] = os.path.join(os.getcwd(), CONFIG_FILENAME)
-
+default['exchange rate base filename'] = XCHANGE_FILENAME_BASE
+default['exchange rate file location'] = os.path.join(config['DEFAULT']['Install Location'], 'loko','biz', 'xchange_data')
 #Create config file
 with open(CONFIG_FILENAME, 'w') as configfile:
 	config.write(configfile)
