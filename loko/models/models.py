@@ -13,13 +13,13 @@ wallet_balance = Float
 #Obtained info from https://en.wikipedia.org/wiki/ISO_4217
 currency_info = {
 	'EUR':{'common name': 'Euro','minor unit':2},
-	'USD':{'common name': 'United States dollar','minor unit':2},
-	'GBP':{'common name': 'Pound sterling','minor unit':2},
-	'JPY':{'common name': 'Japanese yen','minor unit':0},
 	'CHF':{'common name': 'Swiss franc','minor unit':2},
 	'CNY':{'common name': 'Chinese yuan','minor unit':2},
 	'AUD':{'common name': 'Australian dollar','minor unit':2},
 	'CAD':{'common name': 'Canadian dollar','minor unit':2},
+	'USD':{'common name': 'United States dollar','minor unit':2},
+	'GBP':{'common name': 'Pound sterling','minor unit':2},
+	'JPY':{'common name': 'Japanese yen','minor unit':0},
 	'INR':{'common name': 'Indian rupee','minor unit':2},
 	'ZAR':{'common name': 'South African rand','minor unit':2}
 }
@@ -43,13 +43,13 @@ class SupportedCurrencies(Enum):
 		return vals
 
 	EUR = auto()
-	USD = auto()
-	GBP = auto()
-	JPY = auto()
 	CHF = auto()
 	CNY = auto()
 	AUD = auto()
 	CAD = auto()
+	USD = auto()
+	GBP = auto()
+	JPY = auto()
 	INR = auto()
 	ZAR = auto()
 #TODO: Store Base currency info here 
@@ -108,7 +108,6 @@ class Users(Base):
 	authenticated = Column(Boolean, nullable=False)
 	active = Column(Boolean, nullable=False)
 	password_hash = Column(String, nullable=False)
-	#Add a default currency field
 
 	annonymous = False
 

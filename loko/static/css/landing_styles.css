@@ -1,0 +1,18 @@
+/* Global styles*/
+body {
+	background-color: honeydew;
+}
+
+.footer {
+	padding: 5px;
+	margin: 5px;
+}
+
+section.footer {
+	padding: 30px 10px;
+	background-color: #00d1b2;
+}
+
+.prof-pic {
+	color: Dodgerblue;
+}

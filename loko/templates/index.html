@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/landing_styles.css') }}">
+<div class="main-canvas columns">
+	<div class="inner-canvas column is-three-fifths is-offset-one-fifth">
+		<div class="info-block box">
+			<div class="acct-info">
+				<div class="user-details columns">
+					<div class="column is-four-fifths">
+						<div class="notification is-black is-inverted">
+							<p class="is-size-4">User's Name</p> 
+						</div>
+					</div>
+					<div class="column is-one-fifth">
+						<div class="notification is-white">
+							<span class="icon prof-pic">
+								<i class="fas fa-4x fa-user-circle"></i>
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="container is-fluid">
+					<div id="acct_balance" class="notification is-black-ter has-text-centered">
+						<p class="has-text-grey-lighter">Account Balance Shows Up Here</p> 
+					</div> 
+				</div>
+			</div>
+			<div class="footer columns">
+				<div class="column is-3 is-offset-2">
+					<button class="button is-rounded is-link">
+						<span class="icon">
+					    	<i class="fas fa-money-bill-wave"></i>
+						</span>
+						<span>Send Money</span>
+					</button>
+				</div>
+				<div class="column is-3 is-offset-1">
+					<button class="button is-rounded is-info"><span class="icon">
+					    	<i class="fas fa-money-check-alt"></i>
+						</span>
+						<span>Account currency</span>
+					</button>
+				</div>
+			</div>
+			
+		</div>
+		<div class="history-block box">
+			Show Past transactions here
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}
