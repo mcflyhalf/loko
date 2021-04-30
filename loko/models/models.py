@@ -52,7 +52,7 @@ class SupportedCurrencies(Enum):
 	CAD = auto()
 	INR = auto()
 	ZAR = auto()
-
+#TODO: Store Base currency info here 
 class Currencies(Base):
 	__tablename__ = "currencies"
 
@@ -87,13 +87,14 @@ class Transactions(Base):
 	__tablename__ = "transactions"
 
 	id = Column(Integer, primary_key=True)
-	date = Column(DateTime, nullable=False)
+	date_time = Column(DateTime, nullable=False)
 	origin = Column(wallet_id, ForeignKey("wallets.id"), nullable=False)
 	destination = Column(wallet_id, ForeignKey("wallets.id"), nullable=False)
 	originator = Column(user_id, ForeignKey("users.id"), nullable=False)
 	amount = Column(wallet_balance, nullable=False)
 	currency = Column(currency_code, ForeignKey("currencies.alphabetic_code"), nullable=False)
 	exchange_rate = Column(Float, nullable=False)
+	narrative = Column(String(40), nullable=True)
 
 
 class Users(Base):
@@ -103,9 +104,11 @@ class Users(Base):
 	username = Column(String(20),nullable=False,unique=True)	#Always Lowercase
 	name = Column(String,nullable=False)
 	email = Column(String(50),nullable=False)
+	default_currency_alpha_code = Column(currency_code, ForeignKey("currencies.alphabetic_code"), nullable=False)
 	authenticated = Column(Boolean, nullable=False)
 	active = Column(Boolean, nullable=False)
 	password_hash = Column(String, nullable=False)
+	#Add a default currency field
 
 	annonymous = False
 

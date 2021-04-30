@@ -1,7 +1,12 @@
 # Business logic for creation of transactions
-from loko.models.models import Wallets, Users, Currencies
+from datetime import datetime, timezone
+from loko.models.models import Wallets, Users, Currencies, Transactions, SupportedCurrencies
+from loko.models import get_db_session	# Not required, todelete
 
 TRANSACTION_COMMISSION = 0.01
+MAX_COMISSION = 0.08
+LOKO_WALLET_ID = 0
+COMISSION_NARRATIVE = "Charges for transaction "
 
 #TODO: Add detailed logging for this class
 #It is business critical
@@ -12,42 +17,126 @@ class TransactionCreator:
 	:param origin_wallet_id: wallet_id of the source of funds
 	:param origin_user_id: user_id of the transaction initiator. Must be an owner of the wallet
 
-	:raises AuthenticationError: if origin_user_id is not wallet.ownerid 
+	:raises AuthenticationError: if origin_user_id is not wallet.ownerid (TODO: Currently raises the wrong exception)
 	'''
-	def __init__(session, origin_wallet_id, origin_user_id):
+	def __init__(self, session, origin_wallet_id, origin_user_id):
 		self.session = session
-		self.origin_wallet = origin_wallet
-		self.origin_user = origin_user
+		self.origin_wallet_id = origin_wallet_id
+		self.origin_user_id = origin_user_id
+		self.origin_wallet = (session.query(Wallets)
+							.filter(Wallets.id==origin_wallet_id)
+							.one())
+		self.origin_user = (session.query(Users)
+							.filter(Users.id==origin_user_id)
+							.one())
 
-	def send(amount, currency_enum, to=destination_wallet):
+	def send(self,amount, currency_enum, destination_wallet_id, narrative):
 		'''
 		currency here is the enum. Later, it will be an object from the db
 		This is done to avoid the possibility of tampering with exchange rate
 		'''
 		#Check source user has permission to access the wallet
+		try:
+			assert amount > 0
+		except AssertionError:
+			raise ValueError("Amount sent must be greater than 0".)
+		try:
+			assert self.origin_wallet.ownerid == self.origin_user.id
+		except AssertionError:
+			raise PermissionError("User {} has no access to wallet id>{}<"
+								.format(self.origin_user.username, self.origin_wallet.id))
 
 		#Check that the currency specified is either the source or destination wallet's currency
+		destination_wallet = (session.query(Wallets)
+									.filter(Wallets.id==destination_wallet_id)
+									.one())
+		try:
+			assert currency_enum.name == self.origin_wallet.currency_alpha_code or \
+					currency_enum.name == destination_wallet.currency_alpha_code
+		except AssertionError:
+			raise ValueError("Currency {} given does not match source or destination wallet currencies.\
+				currency, should be {} or {}".format(currency_enum.name, self.origin_wallet.currency_alpha_code, destination_wallet.currency_alpha_code))
 
 		#Convert amount into source wallet currrency
+		request_currency = currency_enum
+		origin_wallet_currency = self.origin_wallet.currency_alpha_code
+			#Convert to enum type
+		origin_wallet_currency = SupportedCurrencies[origin_wallet_currency]
+		currency_converter = CurrencyConverter(self.session)
+		conversion = currency_converter.convert(amount,request_currency,origin_wallet_currency)
+		#Slightly confusing below. 
+		#Destination is the destination of the conversion, not destination of the transaction
+		#It is in fact the origin/source of the transaction
+		origin_curr_amt = conversion['destination amount']
 
 		#Check source wallet has enough funds to cover cost of transaction and comission
+		comission = self.calculate_comission(origin_curr_amt)
+		try:
+			assert self.origin_wallet.balance > origin_curr_amt + comission
+		except AssertionError:
+			raise ValueError("Wallet has insufficient funds to cover transaction of {} and comission of {}\
+								Wallet balance is {} but needs to be more than{}".\
+						format(origin_curr_amt, comission, self.origin_wallet.balance, origin_curr_amt + comission))
 
 		#Transact (2 transactions: the requested one and commision)
+		try:
+			origin_curr_obj = (self.session.query(Currencies)
+								.filter(Currencies.alphabetic_code==origin_wallet_currency.name)
+								.one())
+				#Requested transaction
+			req_mf=self._move_funds(origin_curr_amt, origin_curr_obj, self.origin_wallet.id, destination_wallet.id)
+				#Comission
+			com_mf=self._move_funds(comission, origin_curr_obj, self.origin_wallet.id, LOKO_WALLET_ID)
+			req_tx=self._create_transaction(datetime.now(timezone.utc),self.origin_wallet.id,destination_wallet_id,self.origin_user.id,origin_curr_amt,origin_curr_obj.alphabetic_code,conversion['exchange rate'],narrative,self.session)
+			com_nrtv = COMISSION_NARRATIVE+str(req_tx.id)
+			com_tx=self._create_transaction(datetime.now(timezone.utc),self.origin_wallet.id,LOKO_WALLET_ID,self.origin_user.id,comission,origin_curr_obj.alphabetic_code,conversion['exchange rate'],com_nrtv,self.session)
+		except:
+			session.rollback()
+			raise ValueError("General transaction error. Transaction aborted")
 
-		pass
+		# return transaction details
+
+		
+
+	def calculate_comission(self,amount, commision=TRANSACTION_COMMISSION):
+		assert TRANSACTION_COMMISSION <= MAX_COMISSION
+		assert TRANSACTION_COMMISSION > 0
+		assert MAX_COMISSION < 1
+
+		return amount * TRANSACTION_COMMISSION
+
+	def _create_transaction(self,date_time,source_wallet_id,destination_wallet_id,origin_user_id,amount,origin_currency_code,exchange_rate,narrative,session):
+		'''
+		Persists a transaction record to be stored in the db.
+		These records are used to create statements
+		:param date: transaction date. Datetime object
+		:param origin_wallet_id: Origin Wallet ID
+		:param destination_wallet_id: Destination wallet ID
+		:param amount: Amount transferred expressed in origin currency
+		:param currency: Currency of amount transferred. MUST be origin currency (not enforced)
+		:param exchange_rate: Exchange rate used (=1 if origin and destination wallet have same currency)
+		:param narrative: Transaction's narrative, limited to 40 characters
+
+		:returns Transaction: The created transaction object
+		'''
+		transaction = Transactions(
+					date_time=date_time,
+					origin=source_wallet_id,
+					destination=destination_wallet_id,
+					originator=origin_user_id,
+					amount=amount,
+					currency=origin_currency_code,
+					exchange_rate=exchange_rate,
+					narrative=str(narrative)[:40]
+					)
+		session.add(transaction)
+		session.commit()
+
+		return transaction
 
 
 
-	def create_transaction_with_commision():
-		pass
-
-	def calculate_comission():
-		pass
-
-	def _create_transaction():
-		pass
-
-	def _move_funds(amount, currency_obj, source_wallet_id, destination_wallet_id):
+	def _move_funds(self,amount, currency_obj, source_wallet_id, destination_wallet_id):
 		'''
 		Requires funds to be in the source wallet currency
 		currency_obj is an ORM instance. Contains exchange rate
@@ -55,8 +144,8 @@ class TransactionCreator:
 		'''
 		sess = self.session
 		currency = currency_obj
-		source_wallet= sess.query(Wallets).filter_by(sth=sth).one()
-		destination_wallet= sess.query(Wallets).filter_by(sth=sth).one()
+		source_wallet= sess.query(Wallets).filter(Wallets.id==source_wallet_id).one()
+		destination_wallet= sess.query(Wallets).filter(Wallets.id==destination_wallet_id).one()
 
 		assert source_wallet.currency_alpha_code == currency.alphabetic_code
 
@@ -91,10 +180,10 @@ class TransactionCreator:
 
 
 class CurrencyConverter:
-	def __init__(session):
+	def __init__(self,session):
 		self.session = session
 
-	def convert(amount, source_currency_enum, destination_currency_enum):
+	def convert(self,amount, source_currency_enum, destination_currency_enum):
 		exchange_rate = self.get_exchange_rate(source_currency_enum, destination_currency_enum)
 		result = {}
 		result['source currency'] = source_currency_enum.name
@@ -105,30 +194,58 @@ class CurrencyConverter:
 
 		return result
 
-	def get_exchange_rate(source_currency_enum, destination_currency_enum):
+	def get_exchange_rate(self,source_currency_enum, destination_currency_enum):
 		#same currency, no need to do maths
 		if source_currency_enum == destination_currency_enum:
 			return 1.0
 		s_alphacode = source_currency_enum.name
 		d_alphacode = destination_currency_enum.name
-		source_currency = session.\
-						query(Currencies).
-						filter_by(Currencies.alphabetic_code=s_alphacode).
-						one()
-		destination_currency = session.\
-						query(Currencies).
-						filter_by(Currencies.alphabetic_code=d_alphacode).
-						one()
+		source_currency = (session.query(Currencies)
+						.filter(Currencies.alphabetic_code==s_alphacode)
+						.one())
+		destination_currency = (session.query(Currencies)
+						.filter(Currencies.alphabetic_code==d_alphacode)
+						.one())
 
-		#Given exchange rates of source and dest to base currency as:
-		# r_sb and r_db
+		#Given exchange rates of base to source and dest currency as:
+		# r_bs and r_bd
 		# Then the exchange rate of source to destination, r_sd, is given by:
-		# r_sd = r_db/r_sb
-		r_sb = source_currency.xchange_rate
-		r_db = destination_currency.xchange_rate
+		# r_sd = r_bd/r_bs
+		r_bs = source_currency.xchange_rate
+		r_bd = destination_currency.xchange_rate
 
-		r_sb = r_db/r_sb
+		r_sd = r_bd/r_bs
 
-		return r_db
+		return r_sd
+
+
+#Using this as a quick and dirty manual test
+#Will delete once proper automated tests are created
+if __name__ == '__main__':
+	session = get_db_session()
+	origin_wallet_id = 1	#GBP
+	origin_user_id = origin_wallet_id
+	destination_wallet_id = 6	#JPY
+	destination_user_id = destination_wallet_id
+	amount_to_send = 250
+	to_send_currency_enum = SupportedCurrencies['GBP'] #Try other currencies
+	source_currency_enum = to_send_currency_enum
+	to_receive_currency_enum = SupportedCurrencies['JPY']
+	destination_currency_enum = to_receive_currency_enum
+
+
+	narrative = "Test payments"
+
+
+	#Test currency converter
+	# cc = CurrencyConverter(session)
+	# conv = cc.convert(amount_to_send, to_send_currency_enum, to_receive_currency_enum)
+	# print(conv)
+
+	#Test end-2-end transaction
+	tc = TransactionCreator(session, origin_wallet_id, origin_user_id)
+	tc.send(amount_to_send, to_send_currency_enum, destination_wallet_id, narrative)
+
+
 
 

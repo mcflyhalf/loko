@@ -16,7 +16,7 @@ def get_user_creation_kwargs():
 	test_email = 'test@test.co.ke'
 	test_authenticated = False
 	test_active = True
-	test_currency = 'KES'
+	test_currency = 'GBP'
 
 	kwargs = {}
 	kwargs['username'] = test_username
@@ -25,7 +25,7 @@ def get_user_creation_kwargs():
 	kwargs['email'] = test_email
 	kwargs['authenticated'] = test_authenticated
 	kwargs['active'] = test_active
-	kwargs['currency'] = test_currency
+	kwargs['default_currency_alpha_code'] = test_currency
 	return kwargs
 
 
@@ -50,20 +50,20 @@ def test_wallet(test_user_and_wallet):
 class TestWalletCreator:
 
 	def create_wallet(self, user, test_session=test_session):
-		wallet_userid=user.id
+		wallet_ownerid=user.id
 
-		wallet_creator = _WalletCreator(test_session, wallet_userid)
+		wallet_creator = _WalletCreator(test_session, wallet_ownerid)
 		_wallet = wallet_creator.create_wallet()
 		return _wallet
 
 
 	def test_create_wallet(self, test_user):
-		#confirm all fields (balance, curr_code, id exists, userid)
+		#confirm all fields (balance, curr_code, id exists, ownerid)
 		temp_test_wallet = self.create_wallet(test_user)
 		assert type(temp_test_wallet) is Wallets
 		assert temp_test_wallet.balance == 0
 		#TODO: Test against DEFAULT_CURRENCY instead of hardcoding
-		assert temp_test_wallet.currency == 'KES'	# Will fail if the default currency changes
+		assert temp_test_wallet.currency_alpha_code == 'GBP'	# Will fail if the default currency changes
 		assert temp_test_wallet.balance == 0
 
 
@@ -76,7 +76,7 @@ class TestWalletCreator:
 		#an exception
 		duplicated_user = test_user
 		wallet = self.create_wallet(duplicated_user)
-		assert wallet.userid == duplicated_user.id
+		assert wallet.ownerid == duplicated_user.id
 		with pytest.raises(ValueError):
 			raise ValueError('Testing exceptionality')
 
@@ -131,3 +131,49 @@ class TestUserCreator:
 
 
 #------Tests for transactor.py--------
+class TestCurrencyConverter:
+	def test_get_exchange_rate(self):
+		pass
+
+	def test_convert(self):
+		pass
+
+
+class TestTransactionCreator:
+	def test_calculate_comission(self):
+		#test commision =0, comission <0, comission >0
+		pass
+
+	def test_calculate_comission_exceeds_max_comission(self):
+		pass
+
+	def test_calculate_comission_is_zero(self):
+		pass
+
+	def test_send_invalid_amounts(self):
+		#test amount =0, <0, >wallet_balance
+		pass
+
+	def test_send_valid_amounts_same_currency(self):
+		'''
+		Send Valid amounts in the same currency(do this for all existing currencies) then confirm:
+		- 2 Transactions are created
+		- A commision is charged
+		- Commision goes to Loko's account
+		- Debited wallet balance reduces
+		- Credited wallet balance increases
+		'''
+		pass
+
+	def test_send_valid_amount_different_currency(self):
+		'''
+		Send Valid amounts btn wallets in different currency then check:
+		- 2 Transactions are created
+		- A commision is charged
+		- Commision goes to Loko's account
+		- Debited wallet balance reduces
+		- Credited wallet balance increases
+		'''
+		pass
+
+

@@ -6,7 +6,7 @@ from loko import get_logger
 
 logger = get_logger('loko_creator')
 #Changing this doesnt affect existing records
-DEFAULT_CURRENCY = 'KES'
+DEFAULT_CURRENCY_ALPHA_CODE = 'GBP'
 
 
 class UserCreator:
@@ -21,7 +21,7 @@ class UserCreator:
 	authenticated - Bool, whether user is authed
 	active - Bool, whether user is active
 
-	currency='KES' - (optional) ISO4217 currency alphabetic code.
+	currency='GBP' - (optional) ISO4217 currency alphabetic code.
 	'''
 	def __init__(self, session, **kwargs):
 		'''
@@ -33,7 +33,7 @@ class UserCreator:
 		authenticated - Bool, whether user is authed
 		active - Bool, whether user is active
 
-		currency='KES' - (optional) ISO4217 currency alphabetic code.
+		currency='GBP' - (optional) ISO4217 currency alphabetic code.
 		'''
 		self.kwargs = kwargs
 		self.session=session
@@ -44,10 +44,11 @@ class UserCreator:
 		Default wallet currency is set at top of this file
 		'''
 		user = self._create_user_only()
-		user_currency = self.kwargs.get('currency')
+		user_currency = DEFAULT_CURRENCY_ALPHA_CODE
+		# user_currency = self.kwargs.get('currency')
 		if user_currency is None:
-			user_currency = DEFAULT_CURRENCY
-		wallet_creator = _WalletCreator(self.session, user.id, currency=user_currency)
+			user_currency = DEFAULT_CURRENCY_ALPHA_CODE
+		wallet_creator = _WalletCreator(self.session, user.id, currency_alpha_code=user_currency)
 		wallet = wallet_creator.create_wallet()
 		result = {}
 		result['user'] = user
@@ -58,7 +59,7 @@ class UserCreator:
 	def _create_user_only(self):
 		user_kwargs = self.kwargs
 		password = user_kwargs.pop('password')
-		curr = user_kwargs.pop('currency')
+		curr = user_kwargs.get('default_currency_alpha_code')
 		user = models.Users(**user_kwargs)
 
 		user.set_password(password)
@@ -95,34 +96,34 @@ class _WalletCreator:
 	'''
 	Functionality to create a wallet, to ultimately be associated with a user
 	'''
-	def __init__(self, session, userid, currency=DEFAULT_CURRENCY):
-		self.userid = userid
-		self.currency=currency
+	def __init__(self, session, ownerid, currency_alpha_code=DEFAULT_CURRENCY_ALPHA_CODE):
+		self.ownerid = ownerid
+		self.currency_alpha_code=currency_alpha_code
 		self.session = session
 
 	def create_wallet(self):
 		'''
-		Create a wallet with specified userid and currency
+		Create a wallet with specified ownerid and currency
 		'''
 		wallet = models.Wallets(\
-			userid=self.userid,
-			currency=self.currency,
+			ownerid=self.ownerid,
+			currency_alpha_code=self.currency_alpha_code,
 			balance=0)
 		try:
 			logger.info(\
-				"Attempting to create wallet. userid>>{}, currency>>{}, balance>>{}"\
-				.format(wallet.userid, wallet.currency, str(wallet.balance)))
+				"Attempting to create wallet. ownerid>>{}, currency>>{}, balance>>{}"\
+				.format(wallet.ownerid, wallet.currency_alpha_code, str(wallet.balance)))
 			self.session.add(wallet)
 			self.session.commit()
 		except Exception as e:
 			logger.error(\
-				"Error creating wallet. userid>>{}, currency>>{}, balance>>{}.\
+				"Error creating wallet. ownerid>>{}, currency>>{}, balance>>{}.\
 				See exception on next line\n{}"\
-				.format(wallet.userid, wallet.currency, str(wallet.balance), str(e)))
+				.format(wallet.ownerid, wallet.currency_alpha_code, str(wallet.balance), str(e)))
 
 		logger.info(\
-				"Created wallet.walletid>>{}, userid>>{}, currency>>{}, balance>>{}"\
-				.format(wallet.id, wallet.userid, wallet.currency, str(wallet.balance)))
+				"Created wallet.walletid>>{}, ownerid>>{}, currency>>{}, balance>>{}"\
+				.format(wallet.id, wallet.ownerid, wallet.currency_alpha_code, str(wallet.balance)))
 		self.wallet = wallet
 		return wallet
 
