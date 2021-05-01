@@ -10,7 +10,7 @@ import os
 
 setup(
 	name = "loko",
-	version = "0.1.8",
+	version = "0.2.0",
 	author = "Mcflyhalf",
 	author_email = "mcflyhalf@live.com",
 	description = ("Store, send and receive money in different currencies"),

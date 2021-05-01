@@ -12,16 +12,16 @@ wallet_balance = Float
 #TODO: Discuss with other devs. Currently trying to avoid using an api
 #Obtained info from https://en.wikipedia.org/wiki/ISO_4217
 currency_info = {
-	'EUR':{'common name': 'Euro','minor unit':2},
-	'CHF':{'common name': 'Swiss franc','minor unit':2},
-	'CNY':{'common name': 'Chinese yuan','minor unit':2},
-	'AUD':{'common name': 'Australian dollar','minor unit':2},
-	'CAD':{'common name': 'Canadian dollar','minor unit':2},
-	'USD':{'common name': 'United States dollar','minor unit':2},
-	'GBP':{'common name': 'Pound sterling','minor unit':2},
-	'JPY':{'common name': 'Japanese yen','minor unit':0},
-	'INR':{'common name': 'Indian rupee','minor unit':2},
-	'ZAR':{'common name': 'South African rand','minor unit':2}
+	'EUR':{'common name': 'Euro','minor unit':2,'symbol':'€'},
+	'CHF':{'common name': 'Swiss franc','minor unit':2,'symbol':'CHF'},
+	'CNY':{'common name': 'Chinese yuan','minor unit':2,'symbol':'¥'},
+	'AUD':{'common name': 'Australian dollar','minor unit':2,'symbol':'$'},
+	'CAD':{'common name': 'Canadian dollar','minor unit':2,'symbol':'$'},
+	'USD':{'common name': 'United States dollar','minor unit':2,'symbol':'$'},
+	'GBP':{'common name': 'Pound sterling','minor unit':2,'symbol':'£'},
+	'JPY':{'common name': 'Japanese yen','minor unit':0,'symbol':'¥'},
+	'INR':{'common name': 'Indian rupee','minor unit':2,'symbol':'₹'},
+	'ZAR':{'common name': 'South African rand','minor unit':2,'symbol':'R'}
 }
 
 #TODO: Consider moving supported currencies away from code
@@ -40,6 +40,7 @@ class SupportedCurrencies(Enum):
 		vals = {}
 		vals['common name'] = currency_info[name]['common name']
 		vals['minor unit'] = currency_info[name]['minor unit']
+		vals['symbol'] = currency_info[name]['symbol']
 		return vals
 
 	EUR = auto()
@@ -122,8 +123,8 @@ class Users(Base):
 		return self.annonymous
 
 	def check_password(self,password):
-		self.authenticated = check_password_hash(self.password_hash, str(password))
-		return self.is_authenticated()
+		return check_password_hash(self.password_hash, str(password))
+		
 
 	def get_id(self):
 		return str(self.id)

@@ -33,6 +33,26 @@
                 <span style="color: red;">[{{ error }}]</span>
                 {% endfor %}
             </div>
+            <div class="columns">
+                <div class="field column is-three-fifths">
+                    {{form.starting_balance.label()}}
+                    <div class="control">
+                        {{ form.starting_balance(size=32, class="input") }}<br>
+                    </div>
+                    {% for error in form.starting_balance.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+                <div class="field column">
+                    {{ form.currency.label }}
+                    <div class="select">
+                        {{ form.currency() }}<br>
+                    </div>
+                    {% for error in form.currency.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+            </div>
             <div class="field">
                 {{ form.password.label(class="label") }}
                 <div class="control">

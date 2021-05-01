@@ -52,3 +52,4 @@ def get_db_session(env='development'):
 		raise ValueError("env parameter must be 'development', 'test' or 'production'")
 
 	return session_type
+

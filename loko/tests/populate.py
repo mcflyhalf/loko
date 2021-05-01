@@ -44,6 +44,7 @@ def populate_db(session, xchange_response_file):
 		user_and_wallet = usercreator.create_user()
 		wallet = user_and_wallet['wallet']
 		wallet.balance = wallet_balance
+		wallet.id = _id
 		session.flush()
 
 	session.commit()
