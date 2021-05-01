@@ -45,9 +45,12 @@ def register():
 		return redirect(url_for('index_blueprint.landing'))
 	form = RegistrationForm()
 	if form.validate_on_submit():
-		user = models.Users(username=form.username.data.lower(), name=form.name.data, email=form.email.data,authenticated=False,active=True)
+		user = models.Users(username=form.username.data.lower(), name=form.name.data, email=form.email.data,default_currency_alpha_code=form.currency.data,authenticated=False,active=True)
 		user.set_password(form.password.data)
 		session.add(user)
+		session.flush()
+		wallet = models.Wallets(ownerid=user.id, currency_alpha_code=user.default_currency_alpha_code, balance=float(form.starting_balance.data))
+		session.add(wallet)
 		session.commit()
 		flash('Congratulations, you are now a registered user!')
 		return redirect(url_for('auth_blueprint.login'))

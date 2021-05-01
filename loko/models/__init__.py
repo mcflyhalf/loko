@@ -11,14 +11,21 @@ def get_tables_metadata():
 	sorted_tables = Base.metadata.sorted_tables
 	return sorted_tables
 
-production_engine = create_engine('sqlite:///{dbpath}'.format(\
-	dbpath = config['sqlite production db']))
+production_engine = (create_engine(
+					'sqlite:///{dbpath}'.format(
+					dbpath = config['sqlite production db']),
+					connect_args={'check_same_thread': False}))
 
-development_engine = create_engine('sqlite:///{dbpath}'.format(\
-	dbpath = config['sqlite development db']))
+development_engine = (create_engine(
+					'sqlite:///{dbpath}'.format(
+					dbpath = config['sqlite development db']),
+					connect_args={'check_same_thread': False}))
 
-test_engine = create_engine('sqlite:///{dbpath}'.format(\
-	dbpath = config['sqlite test db']))
+test_engine = (create_engine(
+					'sqlite:///{dbpath}'.format(
+					dbpath = config['sqlite test db']),
+					connect_args={'check_same_thread': False}))
+
 
 ProductionSession = sessionmaker(bind=production_engine)
 production_session = ProductionSession()
@@ -45,3 +52,4 @@ def get_db_session(env='development'):
 		raise ValueError("env parameter must be 'development', 'test' or 'production'")
 
 	return session_type
+

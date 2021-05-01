@@ -44,11 +44,11 @@ class UserCreator:
 		Default wallet currency is set at top of this file
 		'''
 		user = self._create_user_only()
-		user_currency = DEFAULT_CURRENCY_ALPHA_CODE
+		user_currency_alpha_code = user.default_currency_alpha_code
 		# user_currency = self.kwargs.get('currency')
-		if user_currency is None:
-			user_currency = DEFAULT_CURRENCY_ALPHA_CODE
-		wallet_creator = _WalletCreator(self.session, user.id, currency_alpha_code=user_currency)
+		if user_currency_alpha_code is None:
+			user_currency_alpha_code = DEFAULT_CURRENCY_ALPHA_CODE
+		wallet_creator = _WalletCreator(self.session, user.id, currency_alpha_code=user_currency_alpha_code)
 		wallet = wallet_creator.create_wallet()
 		result = {}
 		result['user'] = user

@@ -62,7 +62,7 @@ def _save_xchange_data_to_file(xchange_data, path=None):
 		f.write(data + '\n')
 
 
-def get_xchange_data(endpoint):
+def get_xchange_data(endpoint_or_filepath):
 
 	url_params = {}
 	sup_curr = list(SupportedCurrencies)
@@ -73,7 +73,7 @@ def get_xchange_data(endpoint):
 	url_params['symbols']= ','.join(supported_currency_codes)
 	
 	# resp = requests.get(endpoint, params=url_params)
-	with open('../../example_xchange_resp9.pkl','rb') as f:
+	with open(endpoint_or_filepath,'rb') as f:
 		resp=pickle.load(f)
 
 	if resp.status_code != 200:
@@ -97,7 +97,7 @@ def save_xchange_data(xchange_data, path=None,session=None,save_to_db=False):
 if __name__ == '__main__':
 	from loko.models import get_db_session
 	session = get_db_session()
-	xchange_data = get_xchange_data('123')
+	xchange_data = get_xchange_data('../../example_xchange_resp9.pkl')
 	save_xchange_data(xchange_data, session=session, save_to_db=True)
 
 

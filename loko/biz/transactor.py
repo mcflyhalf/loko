@@ -1,8 +1,10 @@
 # Business logic for creation of transactions
 from datetime import datetime, timezone
+from loko import get_logger
 from loko.models.models import Wallets, Users, Currencies, Transactions, SupportedCurrencies
 from loko.models import get_db_session	# Not required, todelete
 
+logger = get_logger("loko_transactor")
 TRANSACTION_COMMISSION = 0.01
 MAX_COMISSION = 0.08
 LOKO_WALLET_ID = 0
@@ -39,7 +41,8 @@ class TransactionCreator:
 		try:
 			assert amount > 0
 		except AssertionError:
-			raise ValueError("Amount sent must be greater than 0".)
+			raise ValueError("Amount sent must be greater than 0.\
+							Requested amount was {}".format(amount))
 		try:
 			assert self.origin_wallet.ownerid == self.origin_user.id
 		except AssertionError:
@@ -47,7 +50,7 @@ class TransactionCreator:
 								.format(self.origin_user.username, self.origin_wallet.id))
 
 		#Check that the currency specified is either the source or destination wallet's currency
-		destination_wallet = (session.query(Wallets)
+		destination_wallet = (self.session.query(Wallets)
 									.filter(Wallets.id==destination_wallet_id)
 									.one())
 		try:
@@ -90,11 +93,11 @@ class TransactionCreator:
 			req_tx=self._create_transaction(datetime.now(timezone.utc),self.origin_wallet.id,destination_wallet_id,self.origin_user.id,origin_curr_amt,origin_curr_obj.alphabetic_code,conversion['exchange rate'],narrative,self.session)
 			com_nrtv = COMISSION_NARRATIVE+str(req_tx.id)
 			com_tx=self._create_transaction(datetime.now(timezone.utc),self.origin_wallet.id,LOKO_WALLET_ID,self.origin_user.id,comission,origin_curr_obj.alphabetic_code,conversion['exchange rate'],com_nrtv,self.session)
-		except:
-			session.rollback()
-			raise ValueError("General transaction error. Transaction aborted")
+		except Exception as e:
+			self.session.rollback()
+			raise e #ValueError("General transaction error. Transaction aborted")
 
-		# return transaction details
+		return req_mf
 
 		
 
@@ -200,10 +203,10 @@ class CurrencyConverter:
 			return 1.0
 		s_alphacode = source_currency_enum.name
 		d_alphacode = destination_currency_enum.name
-		source_currency = (session.query(Currencies)
+		source_currency = (self.session.query(Currencies)
 						.filter(Currencies.alphabetic_code==s_alphacode)
 						.one())
-		destination_currency = (session.query(Currencies)
+		destination_currency = (self.session.query(Currencies)
 						.filter(Currencies.alphabetic_code==d_alphacode)
 						.one())
 

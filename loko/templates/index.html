@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/landing_styles.css') }}">
+<div class="main-canvas columns">
+	<div class="inner-canvas column is-three-fifths is-offset-one-fifth">
+		<div class="info-block box">
+			<div class="acct-info">
+				<div class="user-details columns">
+					<div class="column is-four-fifths">
+						<div class="notification is-black has-text-white ">
+							<p class="is-size-4">{{current_user.name}}</p> 
+						</div>
+					</div>
+					<div class="column is-one-fifth">
+						<div class="notification is-white">
+							<span class="icon prof-pic">
+								<i class="fas fa-4x fa-user-circle"></i>
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="columns is-centered acc-bal-details">
+					<div class="column is-6">
+						<div class="card">
+							<div class="card-header">
+								<span class="card-header-title has-text-centered">Account Balance</span> 
+							</div>
+							<div id="acct_balance" class="card-content  has-text-centered">
+								<p class="bd-notification is-primary">{{wallet['currency_alpha_code']}} {{wallet['display balance']}}</p> 
+							</div> 
+						</div>
+					</div>
+					</div>
+				</div>
+				
+			<div class="footer columns">
+				<div class="column is-3 is-offset-2">
+					<button id="send-money-btn" class="button is-rounded is-link">
+						<span class="icon">
+					    	<i class="fas fa-money-bill-wave"></i>
+						</span>
+						<span>Send Money</span>
+					</button>
+				</div>
+				<div class="column is-3 is-offset-1">
+					<button id="change-acc-curr-btn"class="button is-rounded is-info"><span class="icon">
+					    	<i class="fas fa-money-check-alt"></i>
+						</span>
+						<span>Account currency</span>
+					</button>
+				</div>
+			</div>
+			
+		</div>
+		<div class="history-block box">
+			Show Past transactions here
+		</div>
+	</div>
+</div>
+<!-- Modal for sending money -->
+<div id = "mod-sendmoney" class="modal is-active"> 
+	<div class="modal-background"></div>
+	<div class="modal-card">
+		<header class="modal-card-head">
+			<p class="modal-card-title">Send Money</p>
+			<button class="delete close-modal" aria-label="close"></button>
+		</header>
+		<section class="modal-card-body">
+			<form action="/sendmoney" method="post" novalidate>
+			{{sendmoney_form.hidden_tag()}}
+				<div class="field">
+					{{sendmoney_form.recipient_email.label}}
+					<div class="control">
+						{{ sendmoney_form.recipient_email(size=32, class="input") }}
+					</div>
+					{% for error in sendmoney_form.recipient_email.errors %}
+					<span style="color: red;">[{{ error }}]</span>
+					{% endfor %}
+				</div>
+				<div class="columns">
+					<div class="field column is-three-fifths">
+						{{sendmoney_form.amount.label}}
+						<div class="control">
+							{{ sendmoney_form.amount(size=32, class="input") }}
+						</div>
+						{% for error in sendmoney_form.amount.errors %}
+						<span style="color: red;">[{{ error }}]</span>
+						{% endfor %}
+					</div>
+
+					<div class="field column is-one-fifth">
+						{{sendmoney_form.currency.label}}
+						<div class="select">
+							{{ sendmoney_form.currency() }}
+						</div>
+						{% for error in sendmoney_form.currency.errors %}
+						<span style="color: red;">[{{ error }}]</span>
+						{% endfor %}
+					</div>
+				</div>
+				
+
+				<div class="field">
+					{{sendmoney_form.password.label}}
+					<div class="control">
+						{{ sendmoney_form.password(size=32, class="input") }}
+					</div>
+					{% for error in sendmoney_form.password.errors %}
+					<span style="color: red;">[{{ error }}]</span>
+					{% endfor %}
+				</div>
+			</form>
+		</section>
+		<footer class="modal-card-foot">
+			<button class="button submit-sendmoney submit-form is-success">Send money</button>
+			<button class="button close-modal">Cancel</button>
+		</footer>
+	</div>
+</div>
+
+<script src="{{url_for('static',filename='javascript/landing.js')}}"></script>
+{% endblock %}
