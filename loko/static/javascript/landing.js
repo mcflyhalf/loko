@@ -36,7 +36,7 @@ function process_sendmoney_response(json_response){
 		let acc_bal = tx_info['source balance']
 		acc_bal = acc_bal.toFixed(2);
 		alertmsg = "Transaction successful\n\n\n"
-		alertmsg += "Amount Sent: "+ tx_info['source currency']+ ' '+tx_info['source amount'] +'\n'
+		alertmsg += "Amount Sent: "+ tx_info['source currency']+ ' '+tx_info['source amount'].toFixed(2) +'\n'
 		alertmsg += "Transaction Fee: "+ "TODO\n"//tx_info[''] + tx_info[''] + '\n' 
 		alertmsg += "Account Balance: "+tx_info['source currency']+ ' '+acc_bal
 		

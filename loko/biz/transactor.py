@@ -1,6 +1,6 @@
 # Business logic for creation of transactions
 from datetime import datetime, timezone
-from loko import get_logger
+from loko.utils import get_logger
 from loko.models.models import Wallets, Users, Currencies, Transactions, SupportedCurrencies
 from loko.models import get_db_session	# Not required, todelete
 

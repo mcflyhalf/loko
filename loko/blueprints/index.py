@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 from loko.models import get_db_session
 from loko.models.models import Users, SupportedCurrencies
 from loko.forms import SendMoneyForm
-from loko import get_wallet_attrs_from_user
+from loko.models.db_utils import get_wallet_attrs_from_user
 from loko.biz.transactor import TransactionCreator
 
 index_blueprint = Blueprint('index_blueprint', __name__)
@@ -63,7 +63,7 @@ def request_send_money():
 		except ValueError:
 			return jsonify({'status':'fail', 
 					'Error':'Invalid currency. Currency must be same as source or recipient'})
-		
+
 		response = {'status':'success'}
 		response['transaction info'] = tx_details
 		return jsonify(response)
