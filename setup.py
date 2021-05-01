@@ -1,6 +1,7 @@
 #Create Setup.py file to make the module installable
 from setuptools import setup, find_packages
-from loko import LokoConfig, get_logger, models 
+from loko import LokoConfig, models
+from loko.utils import get_logger 
 from loko.conf import CONFIG_FILENAME
 from loko.biz.xchange import XCHANGE_FILENAME_BASE
 from loko.tests.populate import populate_db
@@ -36,18 +37,18 @@ default['exchange rate test response'] = os.path.join(config['DEFAULT']['Install
 with open(CONFIG_FILENAME, 'w') as configfile:
 	config.write(configfile)
 
-
+xchange_resp_pkl = default['exchange rate test response']
 prod_engine = models.production_engine
-LokoConfig(prod_engine, logger).newconfig(prod_engine,drop_tables=False)
+LokoConfig(prod_engine, logger).newconfig(prod_engine,xchange_resp_pkl,drop_tables=False)
 
 dev_engine = models.development_engine
-LokoConfig(dev_engine, logger).newconfig(dev_engine,drop_tables=True)
+LokoConfig(dev_engine, logger).newconfig(dev_engine,xchange_resp_pkl,drop_tables=False)
 
 #Populate the dev db for dev testing
 #For some reason `pip install -e .` seems to run this entire file twice over
-logger.info("Preparing to populate dev database")
-xchange_resp_file = default['exchange rate test response']
-dev_session = models.get_db_session(env="development")
-logger.info("Starting to populate dev database")
-populate_db(dev_session, xchange_resp_file)
-logger.info("Finished populating dev database")
+# logger.info("Preparing to populate dev database")
+# xchange_resp_file = default['exchange rate test response']
+# dev_session = models.get_db_session(env="development")
+# logger.info("Starting to populate dev database")
+# populate_db(dev_session, xchange_resp_file)
+# logger.info("Finished populating dev database")

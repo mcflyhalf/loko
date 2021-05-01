@@ -1,30 +1,14 @@
-import os
-import logging
-from logging.handlers import RotatingFileHandler
-from loko.conf import get_configs
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import NoResultFound
 from loko import models
-from loko.models.models import Base, Wallets, SupportedCurrencies
+from loko.biz.xchange import get_xchange_data, save_xchange_data
+from loko.models import Base
+from loko.models.models import Wallets, SupportedCurrencies, Users
+from loko.app import app
 
-def get_logger(loggerName):
-	log = logging.getLogger(loggerName)
-	# File handler which logs even debug messages
-	# To atttempt compression of old log files, try https://docs.python.org/3/howto/logging-cookbook.html#using-a-rotator-and-namer-to-customize-log-rotation-processing
-	config = get_configs()
-	log_location = os.path.join(config['install location'],'log','loko.log')
-	fh = RotatingFileHandler(log_location, mode='a', maxBytes=1*1024*1024,backupCount=10, encoding=None, delay=0)
-	fh.setLevel(logging.DEBUG)
-	# Console handler that logs warnings or higher
-	ch = logging.StreamHandler()
-	ch.setLevel(logging.WARNING)
-	# create formatter and add it to the handlers
-	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-	fh.setFormatter(formatter)
-	ch.setFormatter(formatter)
-	# add the handlers to the logger
-	log.addHandler(fh)
-	log.addHandler(ch)
-	log.setLevel(logging.DEBUG)
-	return log
+def get_app():
+	return app
+
 
 #TODO: Move to conf.py
 class LokoConfig:
@@ -55,32 +39,58 @@ class LokoConfig:
 
 		self.logger.info("Tables deleted successfully!")
 
-	def newconfig(self, engine, drop_tables=False):	#For a new install
+	def newconfig(self, engine, xchange_data_pkl, drop_tables=False):	#For a new install
 		'''
 		if drop_tables, drop all tables and create afresh, otherwise
-		#only create new tables
+		only create new tables
+		Also ensure that the Loko Admin user exists to receive comission
 		'''
 		if drop_tables:
 			self.drop_tables(engine)
 		self.create_tables(engine)
 
-def get_wallet_from_user(session, user):
-	wallet = (session.query(Wallets)
-					.filter(Wallets.ownerid==user.id)
-					.one())
-	return wallet
+		Session = sessionmaker(bind=engine)
+		session = Session()
 
-def get_wallet_attrs_from_user(session, user):
-	wlt = get_wallet_from_user(session, user)
-	wlt_cur_enum = SupportedCurrencies[wlt.currency_alpha_code]
-	balance_format_string = '{:,.'+str(wlt_cur_enum.value['minor unit'])+'f}'
-	wallet = {}
-	wallet['currency'] = wlt_cur_enum
-	wallet['currency symbol'] = wlt_cur_enum.value['symbol']
-	wallet['currency_alpha_code'] = wlt_cur_enum.name
-	wallet['actual balance'] = wlt.balance
-	#TODO: Should truncate, not round off
-	wallet['display balance'] = balance_format_string.format(wlt.balance) 
-	wallet['id'] = wlt.id
+		try:
+			q = session.query(Users).filter(Users.id == 0)
+			existing_admin = q.one()
+		except NoResultFound:
+			#Admin does not exist yet
+			admin = {}
+			admin['id'] = 0
+			admin['username'] = 'lokoadmin'
+			admin['name'] = 'Loko Admin'
+			admin['email'] = 'admin@lo.ko'
+			admin['default_currency_alpha_code'] = 'EUR'	#TODO: Unhardcode
+			admin['authenticated'] = False
+			admin['active'] = True
+			admin['password_hash'] = 'CantLogin'
+			admin_user = Users(**admin)
+			session.add(admin_user)
+		else:
+			#currency already exists.  Make sure the values are what we want
+			assert isinstance(existing_admin, Users)
+		session.flush()
 
-	return wallet
+		try:
+			q = session.query(Wallets).filter(Wallets.ownerid == 0)
+			existing_admin_wallet = q.one()
+		except NoResultFound:
+			#Admin does not exist yet
+			admin_wlt = {}
+			admin_wlt['id'] = 0
+			admin_wlt['ownerid'] = admin_user.id
+			admin_wlt['currency_alpha_code'] = admin_user.default_currency_alpha_code
+			admin_wlt['balance'] = 0
+			admin_wallet = Wallets(**admin_wlt)
+			session.add(admin_wallet)
+		else:
+			#currency already exists.  Make sure the values are what we want
+			assert isinstance(existing_admin_wallet, Wallets)		
+		session.flush()
+
+		xchange_data = get_xchange_data(xchange_data_pkl)
+		save_xchange_data(xchange_data, session=session, save_to_db=True)
+
+		session.commit()

@@ -2,7 +2,7 @@
 # Transaction entities are not created here though
 # They are created in transactor.py (subject to change)
 from loko.models import models
-from loko import get_logger
+from loko.utils import get_logger
 
 logger = get_logger('loko_creator')
 #Changing this doesnt affect existing records

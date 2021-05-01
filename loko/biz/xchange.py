@@ -6,7 +6,7 @@ import os
 import requests
 import pickle
 from sqlalchemy.orm.exc import NoResultFound
-from loko import get_configs
+from loko.conf import get_configs
 from loko.models.models import SupportedCurrencies, Currencies
 
 XCHANGE_FILENAME_BASE = 'Xchange_data'
@@ -94,6 +94,7 @@ def save_xchange_data(xchange_data, path=None,session=None,save_to_db=False):
 	else:
 		_save_xchange_data_to_file(xchange_data)
 
+#Testing code...
 if __name__ == '__main__':
 	from loko.models import get_db_session
 	session = get_db_session()

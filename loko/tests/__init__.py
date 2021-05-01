@@ -1,6 +1,7 @@
 import pytest
 from loko.models import get_db_session
-from loko import LokoConfig, get_logger
+from loko import LokoConfig
+from loko.utils import get_logger
 
 logger = get_logger('loko_test')
 
