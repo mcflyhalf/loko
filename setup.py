@@ -1,13 +1,15 @@
 #Create Setup.py file to make the module installable
+import os
+import configparser
 from setuptools import setup, find_packages
 from loko import LokoConfig, models
 from loko.utils import get_logger 
 from loko.conf import CONFIG_FILENAME
 from loko.biz.xchange import XCHANGE_FILENAME_BASE
 from loko.tests.populate import populate_db
-import configparser
-import os
 
+CONFIG_FILENAME='loko_config.cfg'
+XCHANGE_FILENAME_BASE='Xchange_data'
 
 setup(
 	name = "loko",

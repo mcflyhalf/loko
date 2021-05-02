@@ -25,3 +25,5 @@ pyvenv*
 *deleteme*
 *old_dbs*
 *_prod.txt
+*.docx
+*.tmp

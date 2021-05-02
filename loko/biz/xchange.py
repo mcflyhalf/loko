@@ -4,7 +4,7 @@ Currently uses Euro as base currency
 '''
 import os
 import requests
-import pickle
+import pickle5 as pickle
 from sqlalchemy.orm.exc import NoResultFound
 from loko.conf import get_configs
 from loko.models.models import SupportedCurrencies, Currencies
