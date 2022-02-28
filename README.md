@@ -21,6 +21,7 @@ Below, I list what it can currently do and what it cannot do but would be expect
 * Dockerisation
 
 ## Walkthrough of Basic Functionality
+Unfortunately, the site  has currently been taken down and this functionality currently cannot be used.
 ### [Tl;dr] Existing Users
 On Loko, there are a few existing users that you can use to play around with the functionality (also to know whom you can send money to). Their credentials are given below:
 * Usernames – `dev1`, `dev2`, …, `dev6`, `wuser`
